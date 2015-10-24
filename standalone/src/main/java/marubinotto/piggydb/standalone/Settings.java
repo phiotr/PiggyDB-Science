@@ -14,8 +14,10 @@ public class Settings {
 	private File baseDir;
 	
 	private int port;
-	private boolean launchBrowserWhenStartup;
 	private String host;
+	private boolean showTrayIcon;
+	private boolean launchBrowserWhenStartup;
+
 
 	public Settings(File baseDir) throws Exception {
 		this.baseDir = baseDir;
@@ -58,4 +60,13 @@ public class Settings {
 	public void setHost(String host) {
 		this.host = host;
 	}
+
+	public boolean isShowTrayIcon() {
+		return this.showTrayIcon;
+	}
+
+	public void setShowTrayIcon(boolean flag){
+		this.showTrayIcon = flag;
+	}
+
 }

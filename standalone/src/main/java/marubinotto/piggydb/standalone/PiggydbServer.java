@@ -4,8 +4,8 @@ import java.awt.AWTException;
 import java.awt.Desktop;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
-import java.awt.SplashScreen;
 import java.awt.SystemTray;
+import java.awt.SplashScreen;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,21 +49,18 @@ public class PiggydbServer {
 			launch();
 		} 
 		catch (Throwable e) {
-			splashScreen.close();
-			
 			JOptionPane.showMessageDialog(
-				null, 
-				getSystemErrorMessage(), 
-				SERVER_NAME + " Error", 
-				JOptionPane.ERROR_MESSAGE);
+					null,
+					DEFAULT_ERRMSG,
+					SERVER_NAME + " Error",
+					JOptionPane.ERROR_MESSAGE);
+
 			logger.error(e.toString(), e);
-			
 			System.exit(1);
 		}
 	}
-	
-	static final String DEFAULT_ERRMSG = 
-		"An unexpected error occurred. Check the log file for the error.";
+
+	static final String DEFAULT_ERRMSG = "An unexpected error occurred. Check the log file for the error.";
 	
 	static String getSystemErrorMessage() {
 		if (messages == null) return DEFAULT_ERRMSG;
@@ -72,30 +69,40 @@ public class PiggydbServer {
 	
 	static void launch() throws Throwable {
 		messages = ResourceBundle.getBundle("messages");
-		initSplashScreen();
-		
-		splashScreen.message("Loading " + Settings.FILE_NAME + " ...");
+
 		loadSettings();
-		
+
+		initSplashScreen();
+
 		splashScreen.message("Initializing the server ...");
 		initServer();
-		
+
 		splashScreen.message("Starting the server ...");
 		server.start();
 		logger.debug("The server has been started.");
-		ensureWebappAvailable();
-		
-		setupTrayIcon();
+
+		if(settings.isShowTrayIcon() == true){
+			setupTrayIcon();
+		}
 		
 		if (settings.isLaunchBrowserWhenStartup()) {
 			splashScreen.message("Opening the home page ...");
 			launchBrowser();
 		}
-		
+
+		ensureWebappAvailable();
+
 		splashScreen.close();
 		splashScreen = null;
 		
 		server.join();
+	}
+
+	static void loadSettings() throws Exception {
+		File baseDir = new File(System.getProperty("user.dir"));
+		logger.info("baseDir: " + baseDir.getAbsolutePath());
+		
+		settings = new Settings(baseDir);
 	}
 
 	static void initSplashScreen() throws Exception {
@@ -107,18 +114,13 @@ public class PiggydbServer {
 		finally {
 			input.close();
 		}
-		
+
 		SplashScreen s = SplashScreen.getSplashScreen();
-		if (s != null) splashScreen = new PiggydbSplashScreen(s, version);
+		if (s != null) {
+			splashScreen = new PiggydbSplashScreen(s, version);
+		}
 	}
 
-	static void loadSettings() throws Exception {
-		File baseDir = new File(System.getProperty("user.dir"));
-		logger.info("baseDir: " + baseDir.getAbsolutePath());
-		
-		settings = new Settings(baseDir);
-	}
-	
 	static final String WEBAPP_DIR = "webapp";
 	static final String APP_SETTINGS_FILE_NAME = "application.properties";
 	static final String APP_SETTINGS_FILE_PATH = WEBAPP_DIR + "/WEB-INF/config/" + APP_SETTINGS_FILE_NAME;
@@ -181,8 +183,8 @@ public class PiggydbServer {
 	static void setupTrayIcon() throws IOException, AWTException {
 		logger.debug("Loading the tray icon ...");
 		trayIcon = new TrayIcon(
-			ImageIO.read(PiggydbServer.class.getResourceAsStream("tray-icon.png")), 
-			SERVER_NAME);
+				ImageIO.read(PiggydbServer.class.getResourceAsStream("tray-icon.png")),
+				SERVER_NAME);
 		// trayIcon.setImageAutoSize(true);
 
 		PopupMenu menu = new PopupMenu();
@@ -190,8 +192,7 @@ public class PiggydbServer {
 			public void actionPerformed(ActionEvent event) {
 				try {
 					launchBrowser();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
@@ -199,17 +200,16 @@ public class PiggydbServer {
 		menu.add(createMenuItem(messages.getString("info"), new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				trayIcon.displayMessage(
-					SERVER_NAME, 
-					"Piggydb server is running on port " + settings.getPort(), 
-					TrayIcon.MessageType.INFO);
+						SERVER_NAME,
+						"Piggydb server is running on port " + settings.getPort(),
+						TrayIcon.MessageType.INFO);
 			}
 		}));
 		menu.add(createMenuItem(messages.getString("shutdown"), new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
 				try {
 					server.stop();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 				System.exit(0);

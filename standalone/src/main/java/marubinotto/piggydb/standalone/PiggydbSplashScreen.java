@@ -50,7 +50,7 @@ public class PiggydbSplashScreen {
 		this.splashG.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 9));
 		this.splashG.setColor(Color.GRAY);
 		this.splashG.drawImage(this.splashImage, 0, 0, null);
-		
+
 		this.splashScreen.update();
 	}
 	
