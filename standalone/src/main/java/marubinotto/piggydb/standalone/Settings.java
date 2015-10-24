@@ -15,6 +15,7 @@ public class Settings {
 	
 	private int port;
 	private boolean launchBrowserWhenStartup;
+	private String host;
 
 	public Settings(File baseDir) throws Exception {
 		this.baseDir = baseDir;
@@ -48,5 +49,13 @@ public class Settings {
 
 	public void setLaunchBrowserWhenStartup(boolean launchBrowserWhenStartup) {
 		this.launchBrowserWhenStartup = launchBrowserWhenStartup;
+	}
+	
+	public String getHost() {
+		return this.host;
+	}
+	
+	public void setHost(String host) {
+		this.host = host;
 	}
 }

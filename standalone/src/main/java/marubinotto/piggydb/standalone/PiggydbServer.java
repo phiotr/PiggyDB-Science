@@ -29,6 +29,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 
+
 public class PiggydbServer {
 	
 	private static Log logger = LogFactory.getLog(PiggydbServer.class);
@@ -126,6 +127,7 @@ public class PiggydbServer {
 		server = new Server();
 		SelectChannelConnector connector = new SelectChannelConnector();
 		connector.setPort(settings.getPort());
+		connector.setHost(settings.getHost());
 		server.addConnector(connector);
 
 		File resourceBase = settings.getResourcePath(WEBAPP_DIR);
@@ -229,6 +231,7 @@ public class PiggydbServer {
 	
 	static void launchBrowser() throws IOException, URISyntaxException {
 		String url = URL_PREFIX;
+		if (settings.getHost() != null || !settings.getHost().equals("")) url = "http://" + settings.getHost();
 		if (settings.getPort() != 80) url = url + ":" + settings.getPort();
 		Desktop.getDesktop().browse(new URI(url));
 	}
