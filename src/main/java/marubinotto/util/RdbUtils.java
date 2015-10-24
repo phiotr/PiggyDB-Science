@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -12,6 +13,15 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import javax.sql.DataSource;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.lang.UnhandledException;
 import org.dbunit.Assertion;
@@ -36,6 +46,8 @@ import org.dbunit.operation.DatabaseOperation;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.util.ClassUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class RdbUtils {
 
@@ -137,6 +149,41 @@ public class RdbUtils {
 		xmlWriter.write(dataSet);
 	}
 
+	public static void exportFragmentAsXml(Connection jdbcConnection, OutputStream output,
+	    Integer rowId) throws SQLException, DataSetException, ParserConfigurationException, TransformerException {
+	  
+	  Assert.Arg.notNull(jdbcConnection, "jdbcConnection");
+    Assert.Arg.notNull(output, "output");
+    
+    IDatabaseConnection connection = setUpConnection(jdbcConnection);
+    ITable fragmentTable = connection.createQueryTable("fragment", 
+      "SELECT * FROM FRAGMENT WHERE FRAGMENT_ID='" + rowId + "';");
+   
+    
+    DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
+    DocumentBuilder build = fact.newDocumentBuilder();
+    Document doc = build.newDocument();
+    Element root = doc.createElement("root");
+    doc.appendChild(root);
+    String[] cols = {"fragment_id", "content", "creation_datetime", "update_datetime", "file_name",
+      "file_type", "file_size", "children_ordered_by", "children_ordered_in_asc", "password", 
+      "creator", "updater"};
+    for(String colName : cols) {
+      Element element = doc.createElement(colName);
+      element.setNodeValue(fragmentTable.getValue(rowId, colName).toString());
+      root.appendChild(element);
+    }
+    
+    TransformerFactory tFact = TransformerFactory.newInstance();
+    Transformer trans = tFact.newTransformer();
+    trans.setOutputProperty(OutputKeys.INDENT, "yes");
+
+    StringWriter writer = new StringWriter();
+    StreamResult result = new StreamResult(writer);
+    DOMSource source = new DOMSource(doc);
+    trans.transform(source, result); 
+	}
+	
 	public static void cleanImportXml(Connection jdbcConnection, InputStream input)
 			throws SQLException, IOException, DatabaseUnitException {
 		Assert.Arg.notNull(jdbcConnection, "jdbcConnection");
