@@ -8,7 +8,7 @@
 		_instances.push(this);
 	  this.ref = piggydb.widget.getGlobalIdentifier(this);
 	  
-	  this.viewType = "tree";
+	  this.viewType = "cloud";
 	  this.sessionName = null;
 	  this.autoHeight = true;
 	  this.autoFlatWidth = false;
