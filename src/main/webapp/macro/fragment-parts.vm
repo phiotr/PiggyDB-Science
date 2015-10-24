@@ -94,7 +94,7 @@
   <img src="$context/images/document.png" border="0" alt="$messages.get("document")"/></a>
 
 
-  <a class="tool-button" href="/export/?$fragment.id" title="Share fragment">
+  <a class="tool-button" href="/export/?id=$fragment.id" title="Share fragment">
   <img src="$context/style/images/share.png" border="0" alt="Share fragment"/></a>
     
 
