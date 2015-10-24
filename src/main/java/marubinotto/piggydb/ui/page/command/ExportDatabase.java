@@ -1,12 +1,6 @@
 package marubinotto.piggydb.ui.page.command;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
 import javax.servlet.http.HttpServletResponse;
-
-import org.w3c.dom.Document;
-
 import marubinotto.piggydb.impl.PigDump;
 import marubinotto.piggydb.model.enums.Role;
 import marubinotto.piggydb.ui.page.common.DatabaseSpecificBeans;
