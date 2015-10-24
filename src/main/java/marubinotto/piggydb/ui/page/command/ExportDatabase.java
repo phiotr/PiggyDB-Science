@@ -1,6 +1,11 @@
 package marubinotto.piggydb.ui.page.command;
 
+import java.io.File;
+import java.io.FileOutputStream;
+
 import javax.servlet.http.HttpServletResponse;
+
+import org.w3c.dom.Document;
 
 import marubinotto.piggydb.impl.PigDump;
 import marubinotto.piggydb.model.enums.Role;
@@ -20,7 +25,7 @@ public class ExportDatabase extends AbstractCommand {
 	protected void execute() throws Exception {
 		HttpServletResponse response = getContext().getResponse();
 		response.setContentType("application/octet-stream");
-
+	  
 		String timeStamp = DateTime.getCurrentTime().format("yyyyMMddHHmmss");
 		if (getDomain().getFileRepository().size() > 0) {
 			getLogger().info("Exporting as a pig dump ...");

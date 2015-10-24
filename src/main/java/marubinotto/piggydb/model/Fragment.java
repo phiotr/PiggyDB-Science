@@ -17,7 +17,7 @@ public interface Fragment extends Classifiable, Password {
 	
 	public String toStringWithDescendents();
 	
-	
+	public Long getId();
 	//
 	// Title
 	//
