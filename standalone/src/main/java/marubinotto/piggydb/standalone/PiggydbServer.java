@@ -183,7 +183,7 @@ public class PiggydbServer {
 	static void setupTrayIcon() throws IOException, AWTException {
 		logger.debug("Loading the tray icon ...");
 		trayIcon = new TrayIcon(
-				ImageIO.read(PiggydbServer.class.getResourceAsStream("tray-icon.png")),
+				ImageIO.read(PiggydbServer.class.getResourceAsStream("tray-icon24.png")),
 				SERVER_NAME);
 		// trayIcon.setImageAutoSize(true);
 
