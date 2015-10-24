@@ -93,6 +93,11 @@
     title="$messages.get("open-as-document")">
   <img src="$context/images/document.png" border="0" alt="$messages.get("document")"/></a>
 
+  <a class="tool-button" href="#" target="_blank"
+    title="Share fragment">
+  <img src="$context/style/images/share.png" border="0" alt="Share fragment"/></a>
+    
+
 #if ($fragment.canChange($user))
   <a class="tool-button edit-fragment"
 		#if ($fragment.isFile()) 
