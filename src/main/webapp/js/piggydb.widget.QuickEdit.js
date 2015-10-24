@@ -31,9 +31,7 @@ jQuery(function() {
 		  jQuery("div.fragment-content-text").live('dblclick', function() {
 			  var contentDiv = jQuery(this);
 			  var fragment = new piggydb.widget.Fragment(contentDiv);
-			  if (fragment.isEditable()) {
-			  	_openEditor(fragment.id(), contentDiv);
-			  }
+              window.open("/d/" + fragment.id(), "_blank");
 			});
 		},
 		
