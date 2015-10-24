@@ -100,6 +100,12 @@ public class WebResourcePaths {
 			throw new UnhandledException(e);
 		}
 	}
+    
+    public String exportViewPath(Long id) {
+        String url = this.contextPath + "/export/?id=" + id;
+        System.out.println(url);
+        return url;
+    }
 	
 // Internal
 	
