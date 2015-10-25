@@ -1,10 +1,10 @@
 package marubinotto.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,7 +16,6 @@ import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -48,6 +47,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.util.ClassUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 public class RdbUtils {
 
@@ -143,21 +143,21 @@ public class RdbUtils {
 		else {
 			dataSet = connection.createDataSet();
 		}
-
+		
 		Writer writer = new OutputStreamWriter(output, EXPORT_ENCODING);
 		XmlDataSetWriter xmlWriter = new XmlDataSetWriter(writer, EXPORT_ENCODING);
 		xmlWriter.write(dataSet);
 	}
 
-	public static void exportFragmentAsXml(Connection jdbcConnection, OutputStream output,
-	    Integer rowId) throws SQLException, DataSetException, ParserConfigurationException, TransformerException {
+	public static void exportFragmentAsXml(Connection jdbcConnection, //OutputStream output,
+	    Integer rowId) throws SQLException, DataSetException, ParserConfigurationException, TransformerException, IOException {
 	  
 	  Assert.Arg.notNull(jdbcConnection, "jdbcConnection");
-    Assert.Arg.notNull(output, "output");
-    
+    //Assert.Arg.notNull(output, "output");
+    jdbcConnection.createStatement();
     IDatabaseConnection connection = setUpConnection(jdbcConnection);
-    ITable fragmentTable = connection.createQueryTable("fragment", 
-      "SELECT * FROM FRAGMENT WHERE FRAGMENT_ID='" + rowId + "';");
+    //connection.getStatementFactory();
+    ITable fragmentTable = connection.createDataSet().getTable("fragment");
    
     
     DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
@@ -170,18 +170,39 @@ public class RdbUtils {
       "creator", "updater"};
     for(String colName : cols) {
       Element element = doc.createElement(colName);
-      element.setNodeValue(fragmentTable.getValue(rowId, colName).toString());
+      Text textNode = doc.createTextNode(colName);
+      Object textValue = fragmentTable.getValue(rowId, colName);
+      Object elementValue = fragmentTable.getValue(rowId, colName);
+      if(elementValue != null)
+        element.setNodeValue(elementValue.toString());
       root.appendChild(element);
+      if(textValue != null) {
+        textNode.setNodeValue(textValue.toString());
+        element.appendChild(textNode);
+      }
     }
+    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    Transformer transformer = transformerFactory.newTransformer();
+    DOMSource source = new DOMSource(doc);
+    StreamResult result = new StreamResult(new File("D:/file.xml"));
+    transformer.transform(source, result);
     
-    TransformerFactory tFact = TransformerFactory.newInstance();
+    /*Writer writer = new OutputStreamWriter(output, EXPORT_ENCODING);
+    XmlWriter xmlWriter = new XmlWriter(writer, EXPORT_ENCODING);
+    xmlWriter.writeText("asd");*/
+    /*TransformerFactory tFact = TransformerFactory.newInstance();
     Transformer trans = tFact.newTransformer();
     trans.setOutputProperty(OutputKeys.INDENT, "yes");
 
-    StringWriter writer = new StringWriter();
-    StreamResult result = new StreamResult(writer);
+    StringWriter stringWriter = new StringWriter();
+    StreamResult result = new StreamResult(stringWriter);
     DOMSource source = new DOMSource(doc);
     trans.transform(source, result); 
+    output = result.getOutputStream();
+    stringWriter.flush();
+    stringWriter.close();*/
+    //Writer writer = new OutputStreamWriter(output, EXPORT_ENCODING);
+    //writer.write(result.toString());
 	}
 	
 	public static void cleanImportXml(Connection jdbcConnection, InputStream input)

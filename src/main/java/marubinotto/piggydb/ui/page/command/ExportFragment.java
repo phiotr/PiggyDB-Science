@@ -19,7 +19,7 @@ public class ExportFragment extends AbstractCommand {
     response.setContentType("text/xml");
     Integer rowId = Integer.parseInt(getContext().getRequestParameter("id"));
     RdbUtils.exportFragmentAsXml(new DatabaseSpecificBeans(getApplicationContext()).getJdbcConnection(), 
-      response.getOutputStream(), rowId);
+      /*response.getOutputStream(),*/ rowId);
     
     response.flushBuffer();
   }
