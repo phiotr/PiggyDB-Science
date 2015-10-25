@@ -44,6 +44,7 @@ public class RestorePage extends AbstractBorderPage {
 	//
 
 	public Form restoreForm = new Form();
+	public Form importForm = new Form();
 	private FileField dataFileField = new FileField("dataFile", true);
 
 	@Override
@@ -58,6 +59,8 @@ public class RestorePage extends AbstractBorderPage {
 		this.dataFileField.setSize(50);
 		this.restoreForm.add(this.dataFileField);
 		this.restoreForm.add(new Submit("restore", getMessage("RestorePage-restore"), this, "onRestoreClick"));
+		this.importForm.add(this.dataFileField);
+		this.importForm.add(new Submit("import", getMessage("RestorePage-import"), this, "onImportClick"));
 	}
 
 	public boolean onRestoreClick() throws Exception {
@@ -80,7 +83,24 @@ public class RestorePage extends AbstractBorderPage {
 		setRedirectWithMessage(HomePage.class, getMessage("RestorePage-database-restored"));
 		return false;
 	}
-
+	
+	//TODO
+	public boolean onImportClick() throws Exception {
+	  /*if (!this.importForm.isValid()) {
+	    return true;
+	  }
+	  
+	  try {
+	    doImport();
+	  }
+	  catch (DataSetException e) { // XML error
+      this.dataFileField.setError(getMessage("RestorePage-invalid-file"));
+      return true;
+    }
+	  */
+	  setRedirectWithMessage(HomePage.class, getMessage("RestorePage-fragment-imported"));
+	  return false;
+	}
 	/**
 	 * The database version (global_setting/database.version) won't be changed
 	 * since the version belongs to the current schema, not the data.
@@ -113,6 +133,24 @@ public class RestorePage extends AbstractBorderPage {
 			}
 		});
 	}
+	
+	//TODO
+	/*private void doImport() throws Exception {
+	  final DatabaseSchema schema = this.dbSpecificBeans.getDatabaseSchema();
+	  final FileItem fileItem = this.dataFileField.getFileItem();
+	  
+	  getDomain().getTransaction().execute(new Procedure() {
+      public Object execute(Object input) throws Exception {
+        int currentVersion = schema.getVersion();
+        getLogger().info("currentVersion : " + currentVersion);
+        if(fileItem.getName().toLowerCase().endsWith(".xml"))
+          importXml();
+        schema.setVersion(currentVersion++);
+        getSequenceAdjusterList().adjust();
+        return null;
+      }
+    });
+	}*/
 
 	private void cleanTables() throws DatabaseUnitException, SQLException {
 		getLogger().info("Cleaning all tables ...");
@@ -140,4 +178,15 @@ public class RestorePage extends AbstractBorderPage {
 
 	private static class InvalidPigDumpException extends Exception {
 	}
+	
+	//TODO
+	/*private void importXml() 
+	  throws IOException, SQLException, DatabaseUnitException {
+	  
+	  getLogger().info("Importing the fragment from xml ...");
+	  InputStream dataInput = null;
+	  dataInput = this.dataFileField.getFileItem().getInputStream();
+	  RdbUtils.importXml(this.dbSpecificBeans.getJdbcConnection(), dataInput);
+	  dataInput.close();
+	}*/
 }

@@ -152,41 +152,61 @@ public class RdbUtils {
 	public static void exportFragmentAsXml(Connection jdbcConnection, OutputStream output,
 	    Integer rowId) throws SQLException, DataSetException, ParserConfigurationException, TransformerException, IOException {
 	  
-	  Assert.Arg.notNull(jdbcConnection, "jdbcConnection");
-    Assert.Arg.notNull(output, "output");
+    Assert.Arg.notNull(jdbcConnection, "jdbcConnection");
+   Assert.Arg.notNull(output, "output");
 
-    IDatabaseConnection connection = setUpConnection(jdbcConnection);
-    ITable fragmentTable = connection.createDataSet().getTable("fragment");
-    
-    DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
-    DocumentBuilder build = fact.newDocumentBuilder();
-    Document doc = build.newDocument();
-    Element root = doc.createElement("root");
-    doc.appendChild(root);
-    String[] cols = {"fragment_id", "content", "creation_datetime", "update_datetime", "file_name",
-      "file_type", "file_size", "children_ordered_by", "children_ordered_in_asc", "password", 
-      "creator", "updater"};
-    for(String colName : cols) {
-      Element element = doc.createElement(colName);
-      Text textNode = doc.createTextNode(colName);
-      Object textValue = fragmentTable.getValue(rowId, colName);
-      Object elementValue = fragmentTable.getValue(rowId, colName);
-      if(elementValue != null)
-        element.setNodeValue(elementValue.toString());
-      root.appendChild(element);
-      if(textValue != null) {
-        textNode.setNodeValue(textValue.toString());
-        element.appendChild(textNode);
-      }
-    }
-    TransformerFactory transformerFactory = TransformerFactory.newInstance();
-    Transformer transformer = transformerFactory.newTransformer();
-    DOMSource source = new DOMSource(doc);
-    StreamResult result = new StreamResult(output);
-    transformer.transform(source, result);
-    Writer writer = new OutputStreamWriter(output, EXPORT_ENCODING);
-    XmlWriter xmlWriter = new XmlWriter(writer, EXPORT_ENCODING);
-    xmlWriter.writeText(result.toString());
+   String[] cols = {"fragment_id", "content", "creation_datetime", "update_datetime", "file_name",
+       "file_type", "file_size", "children_ordered_by", "children_ordered_in_asc", "password",
+       "creator", "updater"};
+
+   IDatabaseConnection connection = setUpConnection(jdbcConnection);
+   ITable fragmentTable = connection.createDataSet().getTable("fragment");
+
+   DocumentBuilderFactory fact = DocumentBuilderFactory.newInstance();
+   DocumentBuilder build = fact.newDocumentBuilder();
+   Document doc = build.newDocument();
+
+   Element rootNode = doc.createElement("dataset");
+   Element tableNode = doc.createElement("table");
+   Element rowNode = doc.createElement("row");
+
+   rootNode.appendChild(tableNode);
+
+   for(String colName : cols) {
+       Element columnNode = doc.createElement("column");
+     Text columnValue = doc.createTextNode("");
+     columnValue.setNodeValue(colName);
+
+     columnNode.appendChild(columnValue);
+
+     Element valueNode;
+     Object elementValue = fragmentTable.getValue(rowId, colName);
+
+     if(elementValue != null) {
+       valueNode = doc.createElement("value");
+       Text valueText = doc.createTextNode("");
+       valueText.setNodeValue(elementValue.toString());
+       valueNode.appendChild(valueText);
+
+     } else {
+       valueNode = doc.createElement("null");
+     }
+
+     tableNode.appendChild(columnNode);
+     rowNode.appendChild(valueNode);
+   }
+
+   tableNode.appendChild(rowNode);
+   doc.appendChild(rootNode);
+
+   TransformerFactory transformerFactory = TransformerFactory.newInstance();
+   Transformer transformer = transformerFactory.newTransformer();
+   DOMSource source = new DOMSource(doc);
+   StreamResult result = new StreamResult(output);
+   transformer.transform(source, result);
+   Writer writer = new OutputStreamWriter(output, EXPORT_ENCODING);
+   XmlWriter xmlWriter = new XmlWriter(writer, EXPORT_ENCODING);
+   xmlWriter.writeText(result.toString());
 	}
 	
 	public static void cleanImportXml(Connection jdbcConnection, InputStream input)
@@ -198,6 +218,18 @@ public class RdbUtils {
 		IDatabaseConnection connection = setUpConnection(jdbcConnection);
 		DatabaseOperation.CLEAN_INSERT.execute(connection, dataSet);
 	}
+	//TODO
+	//IMPLEMENTATION OF IMPORTING SINGLE FRAGMENTS FROM XML FILES
+	/*public static void importXml(Connection jdbcConnection, InputStream input) 
+	  throws SQLException, DatabaseUnitException {
+	  
+	  Assert.Arg.notNull(jdbcConnection, "jdbcConnection");
+    Assert.Arg.notNull(input, "input");
+    
+    XmlDataSet dataSet = new XmlDataSet(input);
+    IDatabaseConnection connection = setUpConnection(jdbcConnection);
+    DatabaseOperation.INSERT.execute(connection, dataSet);
+	}*/
 
 	public static void deleteAll(Connection jdbcConnection, String tableName)
 			throws DatabaseUnitException, SQLException {
